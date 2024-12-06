@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Troca de Pontos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.6.0/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,65 +61,189 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>Troca de Pontos</h1>
-    <label for="total-pontos">Digite a quantidade de pontos:</label>
-    <input type="number" id="total-pontos" placeholder="Exemplo: 50000" />
-
-    <label for="produto">Digite o produto que deseja trocar:</label>
-    <input type="text" id="produto" placeholder="Exemplo: Kindle" />
-
-    <label for="quantidade">Quantidade do produto:</label>
-    <input type="number" id="quantidade" placeholder="Exemplo: 2" />
-
-    <label for="pontos-produto">Pontos necessários por produto:</label>
-    <input type="number" id="pontos-produto" placeholder="Exemplo: 10000" />
-
-    <button onclick="calcularTroca()">Registrar troca de pontos</button>
-
-    <div class="result" id="resultado">
-        <h2>Comprovante de Troca</h2>
-        <p id="comprovante"></p>
+    <div class="container">
+        <h1>Troca de Pontos</h1>
+        
+        <!-- Selecione o Posto de Atendimento -->
+        <label for="posto-atendimento">Selecione o Posto de Atendimento:</label>
+        <select id="posto-atendimento" onchange="carregarPontosPosto()">
+            <option value="" disabled selected>Escolha o posto de atendimento</option>
+            <option value="posto1">PA 1</option>
+            <option value="posto2">PA 2</option>
+            <!-- Adicione mais postos conforme necessário -->
+        </select>
+        
+        <!-- Pontos disponíveis para o Posto -->
+        <p id="pontos-disponiveis"></p>
+        
+        <!-- Selecione o Produto -->
+        <label for="produto">Selecione o produto que deseja trocar:</label>
+        <select id="produto">
+            <option value="" disabled selected>Escolha o produto</option>
+            <option value="produto1" data-pontos="500">Produto 1 - 500 pontos</option>
+            <option value="produto2" data-pontos="1000">Produto 2 - 1000 pontos</option>
+            <option value="produto3" data-pontos="1500">Produto 3 - 1500 pontos</option>
+            <!-- Adicione mais produtos conforme necessário -->
+        </select>
+        
+        <!-- Quantidade de Produto -->
+        <label for="quantidade">Quantidade do produto:</label>
+        <input type="number" id="quantidade" placeholder="Exemplo: 2" min="1" max="10" onchange="atualizarPontos()">
+        
+        <!-- Exibir os Pontos necessários para a quantidade -->
+        <p id="pontos-produto">Pontos necessários por produto: 0</p>
+        
+        <!-- Adicionar mais Produtos -->
+        <button type="button" onclick="adicionarProduto()">Adicionar Produto</button>
+        
+        <!-- Mostrar a lista de produtos selecionados -->
+        <div id="produtos-selecionados"></div>
+    
+        <!-- Botão para Registrar a Troca de Pontos -->
+        <button onclick="registrarTroca()">Registrar troca de pontos</button>
+        
+        <!-- Comprovante de Troca -->
+        <div class="result" id="resultado">
+            <h2>Comprovante de Troca</h2>
+            <p id="comprovante"></p>
+        </div>
     </div>
-</div>
 
-<script>
-    function calcularTroca() {
-        // Captura os valores dos inputs
-        const totalPontos = parseInt(document.getElementById('total-pontos').value);
-        const produto = document.getElementById('produto').value;
-        const quantidade = parseInt(document.getElementById('quantidade').value);
-        const pontosProduto = parseInt(document.getElementById('pontos-produto').value);
+    <script>
 
-        // Verifica se os valores são válidos
-        if (isNaN(totalPontos) || isNaN(quantidade) || isNaN(pontosProduto) || produto === "") {
-            alert("Por favor, preencha todos os campos corretamente.");
+    // Armazena a pontuação total do usuário
+    let totalPontos = 5000; // Exemplo, altere conforme necessário
+    let pontosRestantes = totalPontos;
+    let produtosSelecionados = []; // Para armazenar os produtos selecionados
+    
+    // Função para carregar os pontos disponíveis para o posto de atendimento
+    function carregarPontosPosto() {
+        const posto = document.getElementById("posto-atendimento").value;
+        
+        // Exemplo de pontos por posto
+        let pontosPosto;
+        if (posto === "posto1") {
+            pontosPosto = 5000; // Exemplo para o Posto 1
+        } else if (posto === "posto2") {
+            pontosPosto = 8000; // Exemplo para o Posto 2
+        }
+        
+        pontosRestantes = pontosPosto;  // Atualiza os pontos restantes
+        document.getElementById("pontos-disponiveis").textContent = `Pontos disponíveis: ${pontosRestantes}`;
+    }
+    
+    // Função para atualizar os pontos necessários para a quantidade do produto
+    function atualizarPontos() {
+        const produtoSelecionado = document.getElementById("produto");
+        const quantidade = document.getElementById("quantidade").value;
+        const pontosPorProduto = produtoSelecionado.selectedOptions[0].getAttribute("data-pontos");
+        
+        // Calcula os pontos totais necessários
+        const pontosTotais = pontosPorProduto * quantidade;
+        document.getElementById("pontos-produto").textContent = `Pontos necessários por produto: ${pontosTotais}`;
+    }
+    
+    // Função para adicionar produtos à lista de seleção
+    function adicionarProduto() {
+        const produtoSelecionado = document.getElementById("produto");
+        const quantidade = document.getElementById("quantidade").value;
+        const pontosPorProduto = produtoSelecionado.selectedOptions[0].getAttribute("data-pontos");
+        const nomeProduto = produtoSelecionado.options[produtoSelecionado.selectedIndex].text;
+        
+        // Verifica se a quantidade de pontos é suficiente
+        const pontosTotais = pontosPorProduto * quantidade;
+        
+        if (pontosTotais > pontosRestantes) {
+            alert("Você não tem pontos suficientes para adicionar este produto.");
             return;
         }
-
-        // Calcula o total de pontos necessários
-        const pontosNecessarios = quantidade * pontosProduto;
-
-        // Verifica se o cliente tem pontos suficientes
-        if (totalPontos >= pontosNecessarios) {
-            const pontosRestantes = totalPontos - pontosNecessarios;
-            document.getElementById('comprovante').innerHTML = `
-                Produto: ${produto} <br>
-                Quantidade: ${quantidade} <br>
-                Pontos usados: ${pontosNecessarios} <br>
-                Pontos restantes: ${pontosRestantes}
-            `;
-        } else {
-            document.getElementById('comprovante').innerHTML = `
-                Você não tem pontos suficientes. <br>
-                Pontos disponíveis: ${totalPontos} <br>
-                Pontos necessários: ${pontosNecessarios}
-            `;
-        }
-
-        // Exibe o comprovante
-        document.getElementById('resultado').style.display = 'block';
+    
+        // Adiciona o produto à lista de produtos selecionados
+        const produto = {
+            nome: nomeProduto,
+            quantidade: quantidade,
+            pontos: pontosTotais
+        };
+        
+        produtosSelecionados.push(produto);
+        
+        // Cria um item de produto para adicionar à lista
+        const itemProduto = document.createElement("div");
+        itemProduto.classList.add("item-produto");
+        itemProduto.innerHTML = `${nomeProduto} - Quantidade: ${quantidade} - Pontos: ${pontosTotais} 
+            <button onclick="removerProduto(this, ${pontosTotais})">Remover</button>`;
+        
+        document.getElementById("produtos-selecionados").appendChild(itemProduto);
+        
+        // Subtrai os pontos do total
+        pontosRestantes -= pontosTotais;
+        document.getElementById("pontos-disponiveis").textContent = `Pontos disponíveis: ${pontosRestantes}`;
     }
+    
+    // Função para remover produtos da lista
+    function removerProduto(button, pontosProduto) {
+        // Remove o item da lista de produtos selecionados
+        const itemProduto = button.parentElement;
+        itemProduto.remove();
+        
+        // Restaura os pontos quando um produto for removido
+        pontosRestantes += pontosProduto;
+        document.getElementById("pontos-disponiveis").textContent = `Pontos disponíveis: ${pontosRestantes}`;
+        
+        // Remove o produto da lista interna
+        produtosSelecionados = produtosSelecionados.filter(produto => produto.pontos !== pontosProduto);
+    }
+    
+    function registrarTroca() {
+        const produtos = document.getElementById("produtos-selecionados").children;
+    
+        // Verifica se há produtos selecionados
+        if (produtos.length === 0) {
+            alert("Por favor, selecione produtos antes de registrar a troca.");
+            return;
+        }
+    
+        let comprovanteTexto = "Você trocou os seguintes produtos:\n";
+    
+        for (let i = 0; i < produtos.length; i++) {
+            // Remove o botão "Remover" do texto exibido
+            const textoProduto = produtos[i].innerText.split("Remover")[0].trim();
+            comprovanteTexto += `${textoProduto}\n`;
+        }
+    
+        comprovanteTexto += `\nTotal de pontos restantes: ${pontosRestantes}`;
+    
+        // Exibe o comprovante no elemento #comprovante
+        document.getElementById("comprovante").innerHTML = comprovanteTexto.replace(/\n/g, "<br>");
+    
+        // Torna o comprovante visível
+        const resultadoDiv = document.getElementById("resultado");
+        resultadoDiv.style.display = "block";
+    
+        // Gera o PDF
+        gerarPDF(comprovanteTexto);
+    
+        // Mensagem de sucesso
+        alert("Troca registrada com sucesso!");
+    }
+    
+    // Função para gerar o PDF
+    function gerarPDF(comprovanteTexto) {
+        const { jsPDF } = window.jspdf; // Obtém a biblioteca jsPDF
+        const doc = new jsPDF();
+    
+        // Adiciona o texto ao PDF
+        const linhas = comprovanteTexto.split("\n"); // Divide o texto em linhas
+        let y = 10; // Posição inicial no PDF
+    
+        linhas.forEach(linha => {
+            doc.text(linha, 10, y);
+            y += 10; // Avança 10 unidades para a próxima linha
+        });
+    
+        // Salva o PDF com um nome
+        doc.save("comprovante_troca.pdf");
+    }    
 </script>
 
 </body>
