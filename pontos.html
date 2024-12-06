@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troca de Pontos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e0ffe0;
+            border-radius: 5px;
+            display: none;
+        }
+        .result p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Troca de Pontos</h1>
+    <label for="total-pontos">Digite a quantidade de pontos:</label>
+    <input type="number" id="total-pontos" placeholder="Exemplo: 50000" />
+
+    <label for="produto">Digite o produto que deseja trocar:</label>
+    <input type="text" id="produto" placeholder="Exemplo: Kindle" />
+
+    <label for="quantidade">Quantidade do produto:</label>
+    <input type="number" id="quantidade" placeholder="Exemplo: 2" />
+
+    <label for="pontos-produto">Pontos necessários por produto:</label>
+    <input type="number" id="pontos-produto" placeholder="Exemplo: 10000" />
+
+    <button onclick="calcularTroca()">Registrar troca de pontos</button>
+
+    <div class="result" id="resultado">
+        <h2>Comprovante de Troca</h2>
+        <p id="comprovante"></p>
+    </div>
+</div>
+
+<script>
+    function calcularTroca() {
+        // Captura os valores dos inputs
+        const totalPontos = parseInt(document.getElementById('total-pontos').value);
+        const produto = document.getElementById('produto').value;
+        const quantidade = parseInt(document.getElementById('quantidade').value);
+        const pontosProduto = parseInt(document.getElementById('pontos-produto').value);
+
+        // Verifica se os valores são válidos
+        if (isNaN(totalPontos) || isNaN(quantidade) || isNaN(pontosProduto) || produto === "") {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
+
+        // Calcula o total de pontos necessários
+        const pontosNecessarios = quantidade * pontosProduto;
+
+        // Verifica se o cliente tem pontos suficientes
+        if (totalPontos >= pontosNecessarios) {
+            const pontosRestantes = totalPontos - pontosNecessarios;
+            document.getElementById('comprovante').innerHTML = `
+                Produto: ${produto} <br>
+                Quantidade: ${quantidade} <br>
+                Pontos usados: ${pontosNecessarios} <br>
+                Pontos restantes: ${pontosRestantes}
+            `;
+        } else {
+            document.getElementById('comprovante').innerHTML = `
+                Você não tem pontos suficientes. <br>
+                Pontos disponíveis: ${totalPontos} <br>
+                Pontos necessários: ${pontosNecessarios}
+            `;
+        }
+
+        // Exibe o comprovante
+        document.getElementById('resultado').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
