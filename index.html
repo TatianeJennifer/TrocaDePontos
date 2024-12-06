@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Troca de Pontos</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.6.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -197,7 +197,6 @@
     function registrarTroca() {
         const produtos = document.getElementById("produtos-selecionados").children;
     
-        // Verifica se há produtos selecionados
         if (produtos.length === 0) {
             alert("Por favor, selecione produtos antes de registrar a troca.");
             return;
@@ -206,7 +205,6 @@
         let comprovanteTexto = "Você trocou os seguintes produtos:\n";
     
         for (let i = 0; i < produtos.length; i++) {
-            // Remove o botão "Remover" do texto exibido
             const textoProduto = produtos[i].innerText.split("Remover")[0].trim();
             comprovanteTexto += `${textoProduto}\n`;
         }
@@ -216,34 +214,43 @@
         // Exibe o comprovante no elemento #comprovante
         document.getElementById("comprovante").innerHTML = comprovanteTexto.replace(/\n/g, "<br>");
     
-        // Torna o comprovante visível
         const resultadoDiv = document.getElementById("resultado");
         resultadoDiv.style.display = "block";
     
         // Gera o PDF
         gerarPDF(comprovanteTexto);
     
-        // Mensagem de sucesso
         alert("Troca registrada com sucesso!");
     }
     
-    // Função para gerar o PDF
     function gerarPDF(comprovanteTexto) {
-        const { jsPDF } = window.jspdf; // Obtém a biblioteca jsPDF
-        const doc = new jsPDF();
+        try {
+            const { jsPDF } = window.jspdf; // Verifica se jsPDF está carregado
+            if (!jsPDF) {
+                alert("Erro: jsPDF não foi carregado. Verifique a inclusão da biblioteca.");
+                return;
+            }
     
-        // Adiciona o texto ao PDF
-        const linhas = comprovanteTexto.split("\n"); // Divide o texto em linhas
-        let y = 10; // Posição inicial no PDF
+            const doc = new jsPDF();
+            const linhas = comprovanteTexto.split("\n"); // Divide o texto em linhas
+            let y = 10;
     
-        linhas.forEach(linha => {
-            doc.text(linha, 10, y);
-            y += 10; // Avança 10 unidades para a próxima linha
-        });
+            linhas.forEach(linha => {
+                if (y > 280) { // Verifica se está no limite da página
+                    doc.addPage();
+                    y = 10;
+                }
+                doc.text(linha, 10, y);
+                y += 10;
+            });
     
-        // Salva o PDF com um nome
-        doc.save("comprovante_troca.pdf");
-    }    
+            doc.save("comprovante_troca.pdf");
+        } catch (error) {
+            console.error("Erro ao gerar PDF:", error);
+            alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
+        }
+    }
+    
 </script>
 
 </body>
