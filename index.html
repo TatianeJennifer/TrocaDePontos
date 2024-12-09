@@ -10,10 +10,11 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
+            background: url('fundo.png') no-repeat center center fixed;
+            background-size: cover; /* Para ajustar a imagem ao tamanho da tela */
         }
         .container {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.9); /* Fundo branco semitransparente */
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -22,7 +23,7 @@
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #165c7d;
         }
         label {
             display: block;
@@ -57,12 +58,14 @@
         .result p {
             margin: 5px 0;
         }
+
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Troca de Pontos</h1>
+        <h1>Troca de Pontos ICATU</h1>
         
         <!-- Selecione o Posto de Atendimento -->
         <label for="posto-atendimento">Selecione o Posto de Atendimento:</label>
@@ -78,17 +81,29 @@
         
         <!-- Selecione o Produto -->
         <label for="produto">Selecione o produto que deseja trocar:</label>
-        <select id="produto">
+        <select id="produto"onchange="atualizarPontos()">
             <option value="" disabled selected>Escolha o produto</option>
-            <option value="produto1" data-pontos="500">Produto 1 - 500 pontos</option>
-            <option value="produto2" data-pontos="1000">Produto 2 - 1000 pontos</option>
-            <option value="produto3" data-pontos="1500">Produto 3 - 1500 pontos</option>
+            <option value="Caneca Café" data-pontos="300">Caneca Café - 300 pontos</option>
+            <option value="Porta Cartões" data-pontos="200">Porta Cartões - 200 pontos</option>
+            <option value="Garrafa Inox" data-pontos="270">Garrafa Inox - 270 pontos</option>
             <!-- Adicione mais produtos conforme necessário -->
         </select>
         
         <!-- Quantidade de Produto -->
         <label for="quantidade">Quantidade do produto:</label>
-        <input type="number" id="quantidade" placeholder="Exemplo: 2" min="1" max="10" onchange="atualizarPontos()">
+        <select id="quantidade" onchange="atualizarPontos()">
+            <option value="" disabled selected>Selecione a quantidade</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select>
         
         <!-- Exibir os Pontos necessários para a quantidade -->
         <p id="pontos-produto">Pontos necessários por produto: 0</p>
@@ -196,13 +211,19 @@
     
     function registrarTroca() {
         const produtos = document.getElementById("produtos-selecionados").children;
-    
+        const postoAtendimento = document.getElementById("posto-atendimento").selectedOptions[0]?.text;
+
+        if (!postoAtendimento) {
+            alert("Por favor, selecione um posto de atendimento antes de registrar a troca.");
+            return;
+        }
+
         if (produtos.length === 0) {
             alert("Por favor, selecione produtos antes de registrar a troca.");
             return;
         }
     
-        let comprovanteTexto = "Você trocou os seguintes produtos:\n";
+        let comprovanteTexto = `Posto de Atendimento: ${postoAtendimento}\n\nVocê trocou os seguintes produtos:\n`;
     
         for (let i = 0; i < produtos.length; i++) {
             const textoProduto = produtos[i].innerText.split("Remover")[0].trim();
