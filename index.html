@@ -46,8 +46,20 @@
             width: 100%;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #58b45b;
         }
+
+
+        /* Espaçamento específico para o botão Adicionar Produto */
+        #adicionar-produto {
+            margin-bottom: 20px; /* Adiciona um espaço abaixo do botão */
+}
+
+ /* Espaçamento específico para o botão Adicionar Produto */
+ #adicionar-produto {
+    margin-bottom: 20px; /* Adiciona um espaço abaixo do botão */
+}
+
         .result {
             margin-top: 20px;
             padding: 10px;
@@ -81,7 +93,7 @@
         
         <!-- Selecione o Produto -->
         <label for="produto">Selecione o produto que deseja trocar:</label>
-        <select id="produto"onchange="atualizarPontos()">
+        <select id="produto" onchange="atualizarPontos()" disabled>
             <option value="" disabled selected>Escolha o produto</option>
             <option value="Caneca Café" data-pontos="300">Caneca Café - 300 pontos</option>
             <option value="Porta Cartões" data-pontos="200">Porta Cartões - 200 pontos</option>
@@ -91,7 +103,7 @@
         
         <!-- Quantidade de Produto -->
         <label for="quantidade">Quantidade do produto:</label>
-        <select id="quantidade" onchange="atualizarPontos()">
+        <select id="quantidade" onchange="atualizarPontos()" disabled>
             <option value="" disabled selected>Selecione a quantidade</option>
             <option value="1">1</option>
             <option value="2">2</option>
@@ -104,12 +116,12 @@
             <option value="9">9</option>
             <option value="10">10</option>
         </select>
-        
+
         <!-- Exibir os Pontos necessários para a quantidade -->
         <p id="pontos-produto">Pontos necessários por produto: 0</p>
-        
-        <!-- Adicionar mais Produtos -->
-        <button type="button" onclick="adicionarProduto()">Adicionar Produto</button>
+
+        <!-- Botão para Adicionar Produto -->
+        <button type="button" id="adicionar-produto" onclick="adicionarProduto()" disabled>Adicionar Produto</button>
         
         <!-- Mostrar a lista de produtos selecionados -->
         <div id="produtos-selecionados"></div>
@@ -145,7 +157,22 @@
         
         pontosRestantes = pontosPosto;  // Atualiza os pontos restantes
         document.getElementById("pontos-disponiveis").textContent = `Pontos disponíveis: ${pontosRestantes}`;
+
+         // Habilita os campos após a seleção do PA
+        document.getElementById("produto").disabled = false;
+        document.getElementById("quantidade").disabled = false;
+        document.getElementById("adicionar-produto").disabled = false;
+
+        // **Limpa todos os dados anteriores**
+        limparTrocas();
     }
+
+    // Função para limpar todos os registros anteriores
+    function limparTrocas() {
+        produtosSelecionados = []; // Limpa a lista de produtos
+        document.getElementById("produtos-selecionados").innerHTML = ""; // Remove produtos listados
+        document.getElementById("resultado").style.display = "none"; // Esconde o comprovante de troca
+}
     
     // Função para atualizar os pontos necessários para a quantidade do produto
     function atualizarPontos() {
@@ -162,6 +189,19 @@
     function adicionarProduto() {
         const produtoSelecionado = document.getElementById("produto");
         const quantidade = document.getElementById("quantidade").value;
+
+        // Verifica se o produto e a quantidade foram selecionados
+        if (!produtoSelecionado.value) {
+            alert("Por favor, selecione um produto.");
+            return;
+        }
+
+        if (!quantidade) {
+            alert("Por favor, selecione a quantidade antes de adicionar um produto.");
+            return;
+        }
+
+
         const pontosPorProduto = produtoSelecionado.selectedOptions[0].getAttribute("data-pontos");
         const nomeProduto = produtoSelecionado.options[produtoSelecionado.selectedIndex].text;
         
